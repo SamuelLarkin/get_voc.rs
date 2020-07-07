@@ -53,7 +53,7 @@ fn word_count(filename: &String) -> HashMap<String, u32> {
 
 
 fn word_count2(filename: &String) -> HashMap<String, u32> {
-    let mut counts : HashMap<String, u32> = HashMap::new();
+    //let mut counts : HashMap<String, u32> = HashMap::new();
 
     let file = File::open(filename);
     /*
@@ -70,7 +70,7 @@ fn word_count2(filename: &String) -> HashMap<String, u32> {
         .collect::<Vec<String>>();
         // value of type `std::vec::Vec<std::string::String>` cannot be built from `std::iter::Iterator<Item=&str>`
     */
-    let iterator :HashMap<String, u32> = io::BufReader::new(file.unwrap())
+    let counts :HashMap<String, u32> = io::BufReader::new(file.unwrap())
         // BufRead.lines().  The iterator returned from this function will yield instances of io::Result<String>.
         .lines()
 
@@ -95,7 +95,7 @@ fn word_count2(filename: &String) -> HashMap<String, u32> {
             counts
         });
 
-    println!("{:?}", iterator);
+    //println!("{:?}", counts);
 
     counts
 }
@@ -108,7 +108,7 @@ fn main() {
     let args: Vec<String> = env::args().collect();
     let filename = &args[1];
 
-    let counts = word_count(filename);
+    let counts = word_count2(filename);
 
     //let contents = fs::read_to_string(filename).expect("Something went wrong reading the file");
 
