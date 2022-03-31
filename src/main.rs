@@ -72,7 +72,6 @@ use counter::Counter;
 
 //type Counts = BTreeMap<String, u32>;
 type Counts = HashMap<String, u32>;
-//let mut delme = Counts::new();
 
 
 
