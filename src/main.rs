@@ -101,10 +101,9 @@ fn get_reader(filename: &Option<String>) -> Box<dyn BufRead>
 
 
 
-fn word_count1(filename: &Option<String>) -> HashMap<String, u32> {
-    // Default implementation with for loops.
-    let mut counts : HashMap<String, u32> = HashMap::new();
-    //let mut counts : BTreeMap<String, u32> = BTreeMap::new();
+/// Default implementation with for loops.
+fn word_count1(filename: &Option<String>) -> Counts {
+    let mut counts = Counts::new();
 
     // Consumes the iterator, returns an (Optional) String
     for line_ in get_reader(filename).lines() {
@@ -150,10 +149,9 @@ fn word_count1_bt(filename: &Option<String>) -> BTreeMap<String, u32> {
 
 /// While - for-loop.
 // TODO someting is wrong with this version as it takes forever.
-fn word_count1a(filename: &Option<String>) -> HashMap<String, u32> {
+fn word_count1b(filename: &Option<String>) -> Counts {
     // Default implementation with for loops.
-    let mut counts : HashMap<String, u32> = HashMap::new();
-    //let mut counts : BTreeMap<String, u32> = BTreeMap::new();
+    let mut counts = Counts::new();
 
     // Consumes the iterator, returns an (Optional) String
     while let Some(std::result::Result::Ok(line)) = get_reader(filename).lines().next() {
@@ -172,9 +170,8 @@ fn word_count1a(filename: &Option<String>) -> HashMap<String, u32> {
 
 
 /// for-loop match.
-fn word_count2(filename: &Option<String>) -> HashMap<String, u32> {
-    let mut counts : HashMap<String, u32> = HashMap::new();
-    //let mut counts : BTreeMap<String, u32> = BTreeMap::new();
+fn word_count2(filename: &Option<String>) -> Counts {
+    let mut counts = Counts::new();
 
     for line in get_reader(filename).lines() {
         match line {
@@ -203,8 +200,8 @@ fn word_count2(filename: &Option<String>) -> HashMap<String, u32> {
 
 
 /// Fluent notation.
-fn word_count3(filename: &Option<String>) -> HashMap<String, u32> {
-    let counts :HashMap<String, u32> = get_reader(filename)
+fn word_count_fluent_1(filename: &Option<String>) -> Counts {
+    let counts: Counts = get_reader(filename)
         // BufRead.lines().  The iterator returned from this function will yield instances of io::Result<String>.
         .lines()
 
@@ -225,7 +222,7 @@ fn word_count3(filename: &Option<String>) -> HashMap<String, u32> {
                 .collect::<Vec<_>>()
         })
 
-        .fold(HashMap::new(), |mut counts: HashMap<String, u32>, word: String| {
+        .fold(Counts::new(), |mut counts: Counts, word: String| {
             *counts.entry(word.to_owned()).or_insert(0) += 1;
             counts
         })
@@ -239,8 +236,8 @@ fn word_count3(filename: &Option<String>) -> HashMap<String, u32> {
 
 
 /// Fluent notation and folding.
-fn word_count4(filename: &Option<String>) -> HashMap<String, u32> {
-    //let mut counts : HashMap<String, u32> = HashMap::new();
+fn word_count_fluent_2(filename: &Option<String>) -> Counts {
+    //let mut counts = Counts::new();
 
     /*
     let iterator = io::BufReader::new(file.unwrap())
@@ -256,7 +253,7 @@ fn word_count4(filename: &Option<String>) -> HashMap<String, u32> {
         .collect::<Vec<String>>();
         // value of type `std::vec::Vec<std::string::String>` cannot be built from `std::iter::Iterator<Item=&str>`
     */
-    let counts :HashMap<String, u32> = get_reader(filename)
+    let counts: Counts = get_reader(filename)
         // BufRead.lines().  The iterator returned from this function will yield instances of io::Result<String>.
         .lines()
 
@@ -283,7 +280,7 @@ fn word_count4(filename: &Option<String>) -> HashMap<String, u32> {
 
         //.map(|s| String::from(s))
         //.map(|s| s.to_string())
-        .fold(HashMap::new(), |mut counts: HashMap<String, u32>, word: String| {
+        .fold(Counts::new(), |mut counts: Counts, word: String| {
             *counts.entry(word.to_string()).or_insert(0) += 1;
             counts
         });
@@ -333,8 +330,10 @@ fn word_count5(filename: &Option<String>) -> HashMap<String, u32> {
 
 
 /// Using a fluent notation of iterators and a global counts.
-fn word_count6(filename: &Option<String>) -> HashMap<String, u32> {
-    let mut counts :HashMap<String, u32> = HashMap::new();
+/// This version is slightly faster than word_count_fluent_5
+fn word_count_fluent_3(filename: &Option<String>) -> Counts {
+    let mut counts = Counts::new();
+
     get_reader(filename)
         // BufRead.lines().  The iterator returned from this function will yield instances of io::Result<String>.
         .lines()
@@ -363,22 +362,25 @@ fn word_count6(filename: &Option<String>) -> HashMap<String, u32> {
 
 
 /// Fluent notation reducing counters.
-fn word_count7(filename: &Option<String>) -> HashMap<String, u32> {
+fn word_count_fluent_4(filename: &Option<String>) -> Counts {
     let counts = get_reader(filename)
         .lines()
         .map(Result::unwrap)
         .map(|l: String| l.split_whitespace().map(String::from).collect::<Counter<_>>())
         .reduce(|a, b| a + b);
 
-    HashMap::<String, u32>::new()
+    // TODO convert Counter to Counts
+    Counts::new()
 }
 
 
 
 // [Creating word iterator from line iterator](https://stackoverflow.com/a/53606081)
 /// Using a fluent notation of iterators and a global counts and for_each.
-fn word_count8(filename: &Option<String>) -> HashMap<String, u32> {
-    let mut counts :HashMap<String, u32> = HashMap::new();
+/// comparable to word_count_fluent_3 with subtle differences.
+fn word_count_fluent_5(filename: &Option<String>) -> Counts {
+    let mut counts = Counts::new();
+
     get_reader(filename)
         // BufRead.lines().  The iterator returned from this function will yield instances of io::Result<String>.
         .lines()
