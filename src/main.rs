@@ -108,31 +108,6 @@ fn word_count1(filename: &Option<String>) -> Counts {
     // Consumes the iterator, returns an (Optional) String
     for line_ in get_reader(filename).lines() {
         if let Ok(line) = line_ {
-            //let words: Vec<&str> = line.split(char::is_whitespace).collect();
-            for word in line.split(char::is_whitespace) {
-                // Filter out multiple spaces delimiting to empty strings.
-                if word.len() > 0 {
-                    *counts.entry(word.to_owned()).or_insert(0u32) += 1u32;
-                }
-            }
-        }
-    }
-
-    counts
-}
-
-
-
-/// Good old double for-loop.
-fn word_count1_bt(filename: &Option<String>) -> BTreeMap<String, u32> {
-    // Default implementation with for loops.
-    //let mut counts : HashMap<String, u32> = HashMap::new();
-    let mut counts : BTreeMap<String, u32> = BTreeMap::new();
-
-    // Consumes the iterator, returns an (Optional) String
-    for line_ in get_reader(filename).lines() {
-        if let Ok(line) = line_ {
-            //let words: Vec<&str> = line.split(char::is_whitespace).collect();
             for word in line.split(char::is_whitespace) {
                 // Filter out multiple spaces delimiting to empty strings.
                 if word.len() > 0 {
@@ -148,20 +123,46 @@ fn word_count1_bt(filename: &Option<String>) -> BTreeMap<String, u32> {
 
 
 /// While - for-loop.
-// TODO someting is wrong with this version as it takes forever.
-fn word_count1b(filename: &Option<String>) -> Counts {
+fn word_count1a(filename: &Option<String>) -> Counts {
     // Default implementation with for loops.
     let mut counts = Counts::new();
 
     // Consumes the iterator, returns an (Optional) String
-    while let Some(std::result::Result::Ok(line)) = get_reader(filename).lines().next() {
-        //let words: Vec<&str> = line.split(char::is_whitespace).collect();
+    let mut rdr = get_reader(filename).lines();   // This CANNOT be part of the while statement.
+    while let Some(std::result::Result::Ok(line)) = rdr.next() {
         for word in line.split(char::is_whitespace) {
             // Filter out multiple spaces delimiting to empty strings.
             if word.len() > 0 {
                 *counts.entry(word.to_owned()).or_insert(0u32) += 1u32;
             }
         }
+    }
+
+    counts
+}
+
+
+
+/// FASTEST OVERALL
+/// While - for-loop.
+fn word_count1b(filename: &Option<String>) -> Counts {
+    // Default implementation with for loops.
+    let mut counts = Counts::new();
+
+    // Consumes the iterator, returns an (Optional) String
+    let mut rdr = get_reader(filename);   // This CANNOT be part of the while statement.
+    let mut line = String::with_capacity(1024);
+    while let Ok(read) = rdr.read_line(&mut line) {
+        if read == 0 {
+            break;
+        }
+        for word in line.split(char::is_whitespace) {
+            // Filter out multiple spaces delimiting to empty strings.
+            if word.len() > 0 {
+                *counts.entry(word.to_owned()).or_insert(0u32) += 1u32;
+            }
+        }
+        line.clear();
     }
 
     counts
@@ -176,9 +177,10 @@ fn word_count2(filename: &Option<String>) -> Counts {
     for line in get_reader(filename).lines() {
         match line {
             Ok(line_) => {
-                // The following line makes the code as slow as word_count3.
+                // The following line makes the code as slow as word_count_fluent_1.
                 //let tokens = line_.split(char::is_whitespace).map(String::from).collect::<Vec<String>>();
-                // The following line is slower than word_count1 but much faster than word_count3.
+                // The following line is slower than word_count1 but much faster than
+                // word_count_fluent_1.
                 //let tokens: Vec<&str> = line_.split(char::is_whitespace).collect();
                 for token in line_.split(char::is_whitespace) {
                     // Filter out multiple spaces delimiting to empty strings.
@@ -195,6 +197,44 @@ fn word_count2(filename: &Option<String>) -> Counts {
     }
 
     counts
+}
+
+
+
+/// SLOWEST NON-FLUENT
+//[source](http://rosettacode.org/wiki/Word_frequency#Rust)
+/// Using a for-loop and a regular expression.
+fn word_count3(filename: &Option<String>) -> Counts {
+    // Example from rosetta code.
+    let word_regex = Regex::new("(?i)[^ ]+").unwrap();
+
+    let mut words = Counts::new();
+    for line in get_reader(filename).lines() {
+        word_regex
+            /*
+             * https://docs.rs/regex/1.3.9/regex/struct.Regex.html#method.find_iter
+             * pub fn Regex::find_iter<'r, 't>(&'r self, text: &'t str) -> Matches<'r, 't>
+             * Returns an iterator for each successive non-overlapping match in text, returning the
+             * start and end byte indices with respect to text.
+             */
+            .find_iter(&line.expect("Read error"))
+            /*
+             * https://docs.rs/regex/1.3.9/regex/struct.Match.html#method.as_str
+             * pub fn Match<'t>::as_str(&self) -> &'t str
+             * Returns the matched text.
+             */
+            .map(|m| m.as_str())
+            .for_each(|word: &str| {
+                /*
+                 * https://doc.rust-lang.org/std/primitive.str.html#method.to_owned
+                 * pub fn str::to_owned(&self) -> String
+                 * Creates owned data from borrowed data, usually by cloning.
+                 */
+                *words.entry(word.to_owned()).or_insert(0u32) += 1u32;
+            });
+    }
+
+    words
 }
 
 
@@ -217,6 +257,7 @@ fn word_count_fluent_1(filename: &Option<String>) -> Counts {
                 .map(String::from)
                 .collect::<Vec<_>>()
             */
+            //l.split_whitespace().map(String::from)
             l.split_whitespace()
                 .map(String::from)
                 .collect::<Vec<_>>()
@@ -292,43 +333,7 @@ fn word_count_fluent_2(filename: &Option<String>) -> Counts {
 
 
 
-//[source](http://rosettacode.org/wiki/Word_frequency#Rust)
-/// Using a regular expression.
-fn word_count5(filename: &Option<String>) -> HashMap<String, u32> {
-    // Example from rosetta code.
-    let word_regex = Regex::new("(?i)[^ ]+").unwrap();
-
-    let mut words : HashMap<String, u32> = HashMap::new();
-    for line in get_reader(filename).lines() {
-        word_regex
-            /*
-             * https://docs.rs/regex/1.3.9/regex/struct.Regex.html#method.find_iter
-             * pub fn Regex::find_iter<'r, 't>(&'r self, text: &'t str) -> Matches<'r, 't>
-             * Returns an iterator for each successive non-overlapping match in text, returning the
-             * start and end byte indices with respect to text.
-             */
-            .find_iter(&line.expect("Read error"))
-            /*
-             * https://docs.rs/regex/1.3.9/regex/struct.Match.html#method.as_str
-             * pub fn Match<'t>::as_str(&self) -> &'t str
-             * Returns the matched text.
-             */
-            .map(|m| m.as_str())
-            .for_each(|word: &str| {
-                /*
-                 * https://doc.rust-lang.org/std/primitive.str.html#method.to_owned
-                 * pub fn str::to_owned(&self) -> String
-                 * Creates owned data from borrowed data, usually by cloning.
-                 */
-                *words.entry(word.to_owned()).or_insert(0u32) += 1u32;
-            });
-    }
-
-    words
-}
-
-
-
+/// FASTEST FLUENT
 /// Using a fluent notation of iterators and a global counts.
 /// This version is slightly faster than word_count_fluent_5
 fn word_count_fluent_3(filename: &Option<String>) -> Counts {
@@ -347,10 +352,13 @@ fn word_count_fluent_3(filename: &Option<String>) -> Counts {
             l.split(char::is_whitespace)
                 .map(String::from)
                 .collect::<Vec<_>>()
+            //l.split_whitespace()
         })
 
         .for_each(|word: String| {
-            *counts.entry(word.to_owned()).or_insert(0u32) += 1u32;
+            // NOTE doing .to_owned() is not needed and it is expansive.
+            //*counts.entry(word.to_owned()).or_insert(0u32) += 1u32;
+            *counts.entry(word).or_insert(0u32) += 1u32;
         })
         ;
 
@@ -361,6 +369,7 @@ fn word_count_fluent_3(filename: &Option<String>) -> Counts {
 
 
 
+/// SLOWEST OVERALL Even slower than Python.
 /// Fluent notation reducing counters.
 fn word_count_fluent_4(filename: &Option<String>) -> Counts {
     let counts = get_reader(filename)
@@ -391,17 +400,36 @@ fn word_count_fluent_5(filename: &Option<String>) -> Counts {
         // Iterator.flat_map().  Creates an iterator that works like map, but flattens nested structure.
         .flat_map(|l: String| {
             l.split_whitespace()
-                .map(|s| s.to_owned())
-                .collect::<Vec<String>>()
-                .into_iter()
+                .map(str::to_owned)
+                .collect::<Vec<_>>()
         })
 
         .for_each(|word: String| {
-            *counts.entry(word.to_owned()).or_insert(0u32) += 1u32;
+            // NOTE doing .to_owned() is not needed and it is expansive.
+            //*counts.entry(word.to_owned()).or_insert(0u32) += 1u32;
+            *counts.entry(word).or_insert(0u32) += 1u32;
         })
         ;
 
     //println!("{:?}", counts);
+
+    counts
+}
+
+
+
+///
+fn word_count_fluent_6(filename: &Option<String>) -> Counts {
+    // Not sure the result is correct since we are spliting on space and what about newlines?
+    let counts = get_reader(filename)
+        .split(b' ')
+        .map(Result::unwrap)
+        .map(String::from_utf8)
+        .map(Result::unwrap)
+        .fold(Counts::new(), |mut counts: Counts, word: String| {
+            *counts.entry(word.to_string()).or_insert(0) += 1;
+            counts
+        });
 
     counts
 }
