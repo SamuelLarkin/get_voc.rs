@@ -6,36 +6,6 @@
 // ~/.cargo/bin/cargo build --release --target x86_64-unknown-linux-musl
 
 /*
-~/.cargo/bin/hyperfine \
-    --prepare="cat $input > /dev/null" \
-    "target/release/get_voc.1 $input &> /dev/null" \
-    "target/release/get_voc.2 $input &> /dev/null" \
-    "target/x86_64-unknown-linux-musl/release/get_voc.1 $input &> /dev/null" \
-    "target/x86_64-unknown-linux-musl/release/get_voc.2 $input &> /dev/null"
-Benchmark #1: target/release/get_voc.1 /space/project/portage/models/WMT2020/hsb-de/corpora/preprocessing.multilingual/bpe.02k/DGT.cs-de.de &> /dev/null
-  Time (mean ± σ):     21.224 s ±  0.231 s    [User: 20.669 s, System: 0.541 s]
-  Range (min … max):   21.039 s … 21.680 s    10 runs
-
-Benchmark #2: target/release/get_voc.2 /space/project/portage/models/WMT2020/hsb-de/corpora/preprocessing.multilingual/bpe.02k/DGT.cs-de.de &> /dev/null
-  Time (mean ± σ):     39.253 s ±  1.103 s    [User: 38.582 s, System: 0.654 s]
-  Range (min … max):   38.584 s … 42.249 s    10 runs
-
-Benchmark #3: target/x86_64-unknown-linux-musl/release/get_voc.1 /space/project/portage/models/WMT2020/hsb-de/corpora/preprocessing.multilingual/bpe.02k/DGT.cs-de.de &> /dev/null
-  Time (mean ± σ):     35.875 s ±  0.093 s    [User: 35.355 s, System: 0.488 s]
-  Range (min … max):   35.755 s … 36.001 s    10 runs
-
-Benchmark #4: target/x86_64-unknown-linux-musl/release/get_voc.2 /space/project/portage/models/WMT2020/hsb-de/corpora/preprocessing.multilingual/bpe.02k/DGT.cs-de.de &> /dev/null
-  Time (mean ± σ):     70.884 s ±  0.122 s    [User: 70.309 s, System: 0.554 s]
-  Range (min … max):   70.715 s … 71.063 s    10 runs
-
-Summary
-  'target/release/get_voc.1 /space/project/portage/models/WMT2020/hsb-de/corpora/preprocessing.multilingual/bpe.02k/DGT.cs-de.de &> /dev/null' ran
-    1.69 ± 0.02 times faster than 'target/x86_64-unknown-linux-musl/release/get_voc.1 /space/project/portage/models/WMT2020/hsb-de/corpora/preprocessing.multilingual/bpe.02k/DGT.cs-de.de &> /dev/null'
-    1.85 ± 0.06 times faster than 'target/release/get_voc.2 /space/project/portage/models/WMT2020/hsb-de/corpora/preprocessing.multilingual/bpe.02k/DGT.cs-de.de &> /dev/null'
-    3.34 ± 0.04 times faster than 'target/x86_64-unknown-linux-musl/release/get_voc.2 /space/project/portage/models/WMT2020/hsb-de/corpora/preprocessing.multilingual/bpe.02k/DGT.cs-de.de &> /dev/null'
-*/
-
-/*
  * [source](https://stackoverflow.com/questions/34733811/what-is-the-difference-between-iter-and-into-iter)
  *     The iterator returned by into_iter may yield any of T, &T or &mut T, depending on the
  *     context.
