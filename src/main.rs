@@ -16,6 +16,16 @@ NOTE
 // [](https://users.rust-lang.org/t/need-help-to-convert-example-to-rust/2658/2)
 
 
+/*
+NOTE
+[Converting &str: to_string vs to_owned (with two benchmarks)]
+(https://medium.com/@ericdreichert/converting-str-to-string-vs-to-owned-with-two-benchmarks-a66fd5a081ce#)
+You should always be using to_owned(). to_string() is the generic conversion to a String from any
+type implementing the ToString trait. It uses the formatting functions and therefor might end up
+doing multiple allocations and running much more code than a simple to_owned() which just allocates
+a buffer and copies the literal into the buffer.
+*/
+
 #![allow(non_upper_case_globals)]
 #![allow(non_camel_case_types)]
 #![allow(dead_code)]
