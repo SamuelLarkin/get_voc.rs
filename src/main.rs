@@ -70,8 +70,8 @@ use regex::Regex;
 use counter::Counter;
 
 
-//type Counts = BTreeMap<String, u32>;
 type Counts = HashMap<String, u32>;
+//type Counts = BTreeMap<String, u32>;   // Almost twice slower than HashMap
 
 
 
