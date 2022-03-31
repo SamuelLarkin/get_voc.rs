@@ -440,14 +440,21 @@ fn word_count_fluent_6(filename: &Option<String>) -> Counts {
 
 
 /// Helper function to display the counts.
-fn print_counts<I, K, V>(counts : I)
+fn print_counts<I, K, V>(counts: I, show_counts: &bool)
     where
         I: Iterator<Item=(K, V)>,
         K: ::std::fmt::Display,
         V: ::std::fmt::Display,
 {
+    let print = if *show_counts {
+        |key, value| { println!("{}\t{}", key, value) }
+    }
+    else {
+        |key, value| { println!("{}", key) }
+    };
+
     for (key, value) in counts {
-        println!("{}\t{}", key, value);
+        print(key, value);
     }
 }
 
@@ -461,13 +468,22 @@ fn print_counts<I, K, V>(counts : I)
 struct Cli {
     #[clap(subcommand)]
     command: Commands,
+
+    /// Show counts
+    #[clap(short, long, name="show_counts")]
+    show_counts: bool,
+
+    /// topk
+    #[clap(short, long, parse(try_from_str))]
+    topk: Option<usize>
 }
 
 
 
 #[derive(Subcommand)]
 enum Commands {
-    #[clap(arg_required_else_help=false, visible_alias="uw")]
+    #[clap(arg_required_else_help=false)]
+    /// Default implementation with for loops.
     /// Good old double for-loop.
     wc1 {
         /// Input file
@@ -475,17 +491,7 @@ enum Commands {
         filename: Option<String>,
     },
 
-    /*
-    #[clap(arg_required_else_help=false, visible_alias="uw")]
-    /// Word count1 BTree
-    wc1_bt {
-        /// Input file
-        #[clap(name="Input file")]
-        filename: Option<String>,
-    },
-    */
-
-    #[clap(arg_required_else_help=false, visible_alias="uw")]
+    #[clap(arg_required_else_help=false)]
     /// While - for-loop.
     wc1a {
         /// Input file
@@ -493,7 +499,15 @@ enum Commands {
         filename: Option<String>,
     },
 
-    #[clap(arg_required_else_help=false, visible_alias="uw")]
+    #[clap(arg_required_else_help=false, visible_alias="fastest")]
+    /// While - for-loop.
+    wc1b {
+        /// Input file
+        #[clap(name="Input file")]
+        filename: Option<String>,
+    },
+
+    #[clap(arg_required_else_help=false)]
     /// for-loop match.
     wc2 {
         /// Input file
@@ -501,49 +515,56 @@ enum Commands {
         filename: Option<String>,
     },
 
-    #[clap(arg_required_else_help=false, visible_alias="uw")]
-    /// Word count3
+    #[clap(arg_required_else_help=false)]
+    /// Using a for-loop and a regular expression.
     wc3 {
         /// Input file
         #[clap(name="Input file")]
         filename: Option<String>,
     },
 
-    #[clap(arg_required_else_help=false, visible_alias="uw")]
+    #[clap(arg_required_else_help=false)]
+    /// Word count3
+    wc_f1 {
+        /// Input file
+        #[clap(name="Input file")]
+        filename: Option<String>,
+    },
+
+    #[clap(arg_required_else_help=false)]
     /// Fluent notation and folding.
-    wc4 {
+    wc_f2 {
         /// Input file
         #[clap(name="Input file")]
         filename: Option<String>,
     },
 
-    #[clap(arg_required_else_help=false, visible_alias="uw")]
-    /// Word count using a regular expression.
-    wc5 {
-        /// Input file
-        #[clap(name="Input file")]
-        filename: Option<String>,
-    },
-
-    #[clap(arg_required_else_help=false, visible_alias="uw")]
+    #[clap(arg_required_else_help=false)]
     /// Using a fluent notation of iterators and a global counts.
-    wc6 {
+    wc_f3 {
         /// Input file
         #[clap(name="Input file")]
         filename: Option<String>,
     },
 
-    #[clap(arg_required_else_help=false, visible_alias="uw")]
+    #[clap(arg_required_else_help=false)]
     /// Fluent notation reducing counters.
-    wc7 {
+    wc_f4 {
         /// Input file
         #[clap(name="Input file")]
         filename: Option<String>,
     },
 
-    #[clap(arg_required_else_help=false, visible_alias="uw")]
+    #[clap(arg_required_else_help=false)]
     /// Using a fluent notation of iterators and a global counts and for_each.
-    wc8 {
+    wc_f5 {
+        /// Input file
+        #[clap(name="Input file")]
+        filename: Option<String>,
+    },
+
+    #[clap(arg_required_else_help=false)]
+    wc_f6 {
         /// Input file
         #[clap(name="Input file")]
         filename: Option<String>,
@@ -558,39 +579,26 @@ fn main() {
     let args = Cli::parse();
     let counts = match &args.command {
         Commands::wc1 {filename} => word_count1(filename),
-        //Commands::wc1_bt {filename} => word_count1_bt(filename),
         Commands::wc1a {filename} => word_count1a(filename),
+        Commands::wc1b {filename} => word_count1b(filename),
         Commands::wc2 {filename} => word_count2(filename),
         Commands::wc3 {filename} => word_count3(filename),
-        Commands::wc4 {filename} => word_count4(filename),
-        Commands::wc5 {filename} => word_count5(filename),
-        Commands::wc6 {filename} => word_count6(filename),
-        Commands::wc7 {filename} => word_count7(filename),
-        Commands::wc8 {filename} => word_count8(filename),
+        Commands::wc_f1 {filename} => word_count_fluent_1(filename),
+        Commands::wc_f2 {filename} => word_count_fluent_2(filename),
+        Commands::wc_f3 {filename} => word_count_fluent_3(filename),
+        Commands::wc_f4 {filename} => word_count_fluent_4(filename),
+        Commands::wc_f5 {filename} => word_count_fluent_5(filename),
+        Commands::wc_f6 {filename} => word_count_fluent_6(filename),
     };
-
-    //let contents = fs::read_to_string(filename).expect("Something went wrong reading the file");
-
-    /*
-       for (key, value) in &counts {
-       println!("{} {}", key, value);
-       }
-       */
 
     // [Word Frequency](http://rosettacode.org/wiki/Word_frequency#Rust)
     let mut words: Vec<_> = counts.iter().collect();
     words.sort_unstable_by_key(|&(word, count)| (Reverse(count), word));
 
-    /*
-       let n = 10;
-       for (word, count) in words.iter().take(n) {
-       println!("{:8} {:>8}", word, count);
-       }
-       */
-    /*
-       for (word, count) in words.iter() {
-       println!("{:8} {:>8}", word, count);
-       }
-       */
-    print_counts(words.into_iter().take(10));
+    if let Some(topk) = args.topk {
+        print_counts(words.into_iter().take(topk), &args.show_counts);
+    }
+    else {
+        print_counts(words.into_iter(), &args.show_counts);
+    }
 }
