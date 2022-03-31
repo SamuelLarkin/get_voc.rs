@@ -26,6 +26,19 @@ doing multiple allocations and running much more code than a simple to_owned() w
 a buffer and copies the literal into the buffer.
 */
 
+/*
+NOTE
+[What is the idiomatic way to convert &str to String?]
+(https://users.rust-lang.org/t/what-is-the-idiomatic-way-to-convert-str-to-string/12160/7)
+* to_owned: I have a borrowed object and I want an owned version
+* to_string: I want the textual representation of something
+* into (or String::from): I want a generic type conversion
+* format!: I want a textual representation of something in a particular representation. Basically a
+  fancy way of calling to_string (to_string is implemented generically for Display, the canonical
+  way of using Display is through format!)
+*/
+
+
 #![allow(non_upper_case_globals)]
 #![allow(non_camel_case_types)]
 #![allow(dead_code)]
