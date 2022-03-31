@@ -7,12 +7,9 @@
 
 /*
  * [source](https://stackoverflow.com/questions/34733811/what-is-the-difference-between-iter-and-into-iter)
- *     The iterator returned by into_iter may yield any of T, &T or &mut T, depending on the
- *     context.
+ *     The iterator returned by into_iter may yield any of T, &T or &mut T, depending on the context.
  *     The iterator returned by iter will yield &T, by convention.
- *     The iterator returned
- *     by iter_mut will yield &mut T, by convention.
- *
+ *     The iterator returned by iter_mut will yield &mut T, by convention.
  */
 
 // [](https://users.rust-lang.org/t/need-help-to-convert-example-to-rust/2658/2)
