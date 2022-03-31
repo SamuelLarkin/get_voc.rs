@@ -1,3 +1,4 @@
+// vim:nowrap:
 // https://doc.rust-lang.org/edition-guide/rust-2018/platform-and-target-support/musl-support-for-fully-static-binaries.html
 // https://forge.rust-lang.org/release/platform-support.html
 // source ~/.cargo/env
