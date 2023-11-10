@@ -102,7 +102,7 @@ fn get_reader(filename: &Option<String>) -> Box<dyn BufRead>
 
 
 /// Default implementation with for loops.
-fn word_count1(filename: &Option<String>) -> Counts {
+fn worc_count_for_for(filename: &Option<String>) -> Counts {
     let mut counts = Counts::new();
 
     // Consumes the iterator, returns an (Optional) String
@@ -123,7 +123,7 @@ fn word_count1(filename: &Option<String>) -> Counts {
 
 
 /// While - for-loop.
-fn word_count1a(filename: &Option<String>) -> Counts {
+fn word_count_while_for(filename: &Option<String>) -> Counts {
     // Default implementation with for loops.
     let mut counts = Counts::new();
 
@@ -144,8 +144,8 @@ fn word_count1a(filename: &Option<String>) -> Counts {
 
 
 /// FASTEST OVERALL
-/// While - for-loop.
-fn word_count1b(filename: &Option<String>) -> Counts {
+/// Buffer - While - for-loop.
+fn word_count_buffer_while_for(filename: &Option<String>) -> Counts {
     // Default implementation with for loops.
     let mut counts = Counts::new();
 
@@ -171,7 +171,7 @@ fn word_count1b(filename: &Option<String>) -> Counts {
 
 
 /// for-loop match.
-fn word_count2(filename: &Option<String>) -> Counts {
+fn word_count_for_match_for(filename: &Option<String>) -> Counts {
     let mut counts = Counts::new();
 
     for line in get_reader(filename).lines() {
@@ -179,7 +179,7 @@ fn word_count2(filename: &Option<String>) -> Counts {
             Ok(line_) => {
                 // The following line makes the code as slow as word_count_fluent_1.
                 //let tokens = line_.split(char::is_whitespace).map(String::from).collect::<Vec<String>>();
-                // The following line is slower than word_count1 but much faster than
+                // The following line is slower than worc_count_for_for but much faster than
                 // word_count_fluent_1.
                 //let tokens: Vec<&str> = line_.split(char::is_whitespace).collect();
                 for token in line_.split(char::is_whitespace) {
@@ -204,7 +204,7 @@ fn word_count2(filename: &Option<String>) -> Counts {
 /// SLOWEST NON-FLUENT
 //[source](http://rosettacode.org/wiki/Word_frequency#Rust)
 /// Using a for-loop and a regular expression.
-fn word_count3(filename: &Option<String>) -> Counts {
+fn word_count_regex_for(filename: &Option<String>) -> Counts {
     // Example from rosetta code.
     let word_regex = Regex::new("(?i)[^ ]+").unwrap();
 
@@ -485,7 +485,7 @@ enum Commands {
     #[clap(arg_required_else_help=false)]
     /// Default implementation with for loops.
     /// Good old double for-loop.
-    wc1 {
+    wcff {
         /// Input file
         #[clap(name="Input file")]
         filename: Option<String>,
@@ -493,23 +493,23 @@ enum Commands {
 
     #[clap(arg_required_else_help=false)]
     /// While - for-loop.
-    wc1a {
+    wcwf {
         /// Input file
         #[clap(name="Input file")]
         filename: Option<String>,
     },
 
     #[clap(arg_required_else_help=false, visible_alias="fastest")]
-    /// While - for-loop.
-    wc1b {
+    /// Buffer - While - for-loop.
+    wcbwf {
         /// Input file
         #[clap(name="Input file")]
         filename: Option<String>,
     },
 
     #[clap(arg_required_else_help=false)]
-    /// for-loop match.
-    wc2 {
+    /// for-loop match for-loop.
+    wcfmf {
         /// Input file
         #[clap(name="Input file")]
         filename: Option<String>,
@@ -517,7 +517,7 @@ enum Commands {
 
     #[clap(arg_required_else_help=false)]
     /// Using a for-loop and a regular expression.
-    wc3 {
+    wcrf {
         /// Input file
         #[clap(name="Input file")]
         filename: Option<String>,
@@ -578,11 +578,11 @@ enum Commands {
 fn main() {
     let args = Cli::parse();
     let counts = match &args.command {
-        Commands::wc1 {filename} => word_count1(filename),
-        Commands::wc1a {filename} => word_count1a(filename),
-        Commands::wc1b {filename} => word_count1b(filename),
-        Commands::wc2 {filename} => word_count2(filename),
-        Commands::wc3 {filename} => word_count3(filename),
+        Commands::wcff {filename} => worc_count_for_for(filename),
+        Commands::wcwf {filename} => word_count_while_for(filename),
+        Commands::wcbwf {filename} => word_count_buffer_while_for(filename),
+        Commands::wcfmf {filename} => word_count_for_match_for(filename),
+        Commands::wcrf {filename} => word_count_regex_for(filename),
         Commands::wc_f1 {filename} => word_count_fluent_1(filename),
         Commands::wc_f2 {filename} => word_count_fluent_2(filename),
         Commands::wc_f3 {filename} => word_count_fluent_3(filename),
