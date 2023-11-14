@@ -264,7 +264,7 @@ fn word_count_fluent_1(filename: &Option<String>) -> Counts {
         })
 
         .fold(Counts::new(), |mut counts: Counts, word: String| {
-            *counts.entry(word.to_owned()).or_insert(0) += 1;
+            *counts.entry(word).or_insert(0) += 1;
             counts
         })
         ;
@@ -322,7 +322,7 @@ fn word_count_fluent_2(filename: &Option<String>) -> Counts {
         //.map(|s| String::from(s))
         //.map(|s| s.to_string())
         .fold(Counts::new(), |mut counts: Counts, word: String| {
-            *counts.entry(word.to_string()).or_insert(0) += 1;
+            *counts.entry(word).or_insert(0) += 1;
             counts
         });
 
@@ -427,7 +427,7 @@ fn word_count_fluent_6(filename: &Option<String>) -> Counts {
         .map(String::from_utf8)
         .map(Result::unwrap)
         .fold(Counts::new(), |mut counts: Counts, word: String| {
-            *counts.entry(word.to_string()).or_insert(0) += 1;
+            *counts.entry(word).or_insert(0u32) += 1u32;
             counts
         });
 
