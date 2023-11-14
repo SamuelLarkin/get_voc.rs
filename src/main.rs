@@ -436,6 +436,24 @@ fn word_count_fluent_6(filename: &Option<String>) -> Counts {
 
 
 
+// [Creating a sliding window iterator of slices of chars from a String](https://stackoverflow.com/a/51261570)
+/// Trying not to make copies of the original string but rather have pointer into it for the
+/// substrings.
+fn char_windows<'a>(src: &'a str, win_size: usize) -> impl Iterator<Item = &'a str> {
+    src.char_indices()
+        .flat_map(move |(from, _)| {
+            src[from ..].char_indices()
+                .skip(win_size - 1)
+                .next()
+                .map(|(to, c)| {
+                    &src[from .. from + to + c.len_utf8()]
+                })
+    })
+}
+
+
+
+
 
 
 
