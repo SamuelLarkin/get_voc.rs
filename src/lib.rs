@@ -96,6 +96,7 @@ pub fn worc_count_for_for(filename: &Option<String>) -> Counts {
     for line_ in get_reader(filename).lines() {
         if let Ok(line) = line_ {
             for word in line.split(char::is_whitespace) {
+                // word: str
                 // Filter out multiple spaces delimiting to empty strings.
                 if word.len() > 0 {
                     *counts.entry(word.to_owned()).or_insert(0u32) += 1u32;
@@ -118,6 +119,7 @@ pub fn word_count_while_for(filename: &Option<String>) -> Counts {
     let mut rdr = get_reader(filename).lines();   // This CANNOT be part of the while statement.
     while let Some(std::result::Result::Ok(line)) = rdr.next() {
         for word in line.split(char::is_whitespace) {
+            // word: str
             // Filter out multiple spaces delimiting to empty strings.
             if word.len() > 0 {
                 *counts.entry(word.to_owned()).or_insert(0u32) += 1u32;
@@ -144,6 +146,7 @@ pub fn word_count_buffer_while_for(filename: &Option<String>) -> Counts {
             break;
         }
         for word in line.split(char::is_whitespace) {
+            // word: str
             // Filter out multiple spaces delimiting to empty strings.
             if word.len() > 0 {
                 *counts.entry(word.to_owned()).or_insert(0u32) += 1u32;
@@ -170,6 +173,7 @@ pub fn word_count_for_match_for(filename: &Option<String>) -> Counts {
                 // word_count_fluent_1.
                 //let tokens: Vec<&str> = line_.split(char::is_whitespace).collect();
                 for token in line_.split(char::is_whitespace) {
+                    // token: str
                     // Filter out multiple spaces delimiting to empty strings.
                     if token.len() > 0 {
                         *counts.entry(token.to_owned()).or_insert(0u32) += 1u32;
@@ -237,21 +241,15 @@ pub fn word_count_fluent_1(filename: &Option<String>) -> Counts {
         .map(Result::unwrap)
 
         // Iterator.flat_map().  Creates an iterator that works like map, but flattens nested structure.
+        // pub fn String::split<'a, P>(&'a self, pat: P) -> Split<'a, P>
         .flat_map(|l: String| {
-            // pub fn String::split<'a, P>(&'a self, pat: P) -> Split<'a, P>
-            /*
-            l.split(char::is_whitespace)
-                .map(String::from)
-                .collect::<Vec<_>>()
-            */
-            //l.split_whitespace().map(String::from)
-            l.split_whitespace()
-                .map(String::from)
+            l.split_whitespace()  // <- different from word_count_fluent_2
+                .map(str::to_owned)
                 .collect::<Vec<_>>()
         })
 
         .fold(Counts::new(), |mut counts: Counts, word: String| {
-            *counts.entry(word).or_insert(0) += 1;
+            *counts.entry(word).or_insert(0u32) += 1u32;
             counts
         })
         ;
@@ -264,7 +262,38 @@ pub fn word_count_fluent_1(filename: &Option<String>) -> Counts {
 
 
 /// Fluent notation and folding.
+// Same as word_count_fluent_1 except it uses l.split(char::is_whitespace)
 pub fn word_count_fluent_2(filename: &Option<String>) -> Counts {
+    let counts: Counts = get_reader(filename)
+        // BufRead.lines().  The iterator returned from this function will yield instances of io::Result<String>.
+        .lines()
+
+        // Result.unwrap().  Returns the contained Ok value, consuming the self value.
+        //.map(|r: io::Result<String>| r.unwrap())
+        .map(Result::unwrap)
+
+        // Iterator.flat_map().  Creates an iterator that works like map, but flattens nested structure.
+        // pub fn String::split<'a, P>(&'a self, pat: P) -> Split<'a, P>
+        .flat_map(|l: String| {
+            l.split(char::is_whitespace)  // <- different from word_count_fluent_1
+                .map(str::to_owned)
+                .collect::<Vec<_>>()
+        })
+
+        .fold(Counts::new(), |mut counts: Counts, word: String| {
+            *counts.entry(word).or_insert(0u32) += 1u32;
+            counts
+        });
+
+    //println!("{:?}", counts);
+
+    counts
+}
+
+
+
+/// Fluent notation and folding.
+pub fn word_count_fluent_2_test(filename: &Option<String>) -> Counts {
     //let mut counts = Counts::new();
 
     /*
@@ -309,7 +338,7 @@ pub fn word_count_fluent_2(filename: &Option<String>) -> Counts {
         //.map(|s| String::from(s))
         //.map(|s| s.to_string())
         .fold(Counts::new(), |mut counts: Counts, word: String| {
-            *counts.entry(word).or_insert(0) += 1;
+            *counts.entry(word).or_insert(0u32) += 1u32;
             counts
         });
 
@@ -323,7 +352,7 @@ pub fn word_count_fluent_2(filename: &Option<String>) -> Counts {
 /// FASTEST FLUENT
 /// Using a fluent notation of iterators and a global counts.
 /// This version is slightly faster than word_count_fluent_5
-pub fn word_count_fluent_3(filename: &Option<String>) -> Counts {
+pub fn word_count_fluent_3_flat_map_for_each(filename: &Option<String>) -> Counts {
     let mut counts = Counts::new();
 
     get_reader(filename)
@@ -337,14 +366,11 @@ pub fn word_count_fluent_3(filename: &Option<String>) -> Counts {
         .flat_map(|l: String| {
             // pub fn String::split<'a, P>(&'a self, pat: P) -> Split<'a, P>
             l.split(char::is_whitespace)
-                .map(String::from)
+                .map(str::to_owned)
                 .collect::<Vec<_>>()
-            //l.split_whitespace()
         })
 
         .for_each(|word: String| {
-            // NOTE doing .to_owned() is not needed and it is expansive.
-            //*counts.entry(word.to_owned()).or_insert(0u32) += 1u32;
             *counts.entry(word).or_insert(0u32) += 1u32;
         })
         ;
@@ -358,11 +384,15 @@ pub fn word_count_fluent_3(filename: &Option<String>) -> Counts {
 
 /// SLOWEST OVERALL Even slower than Python.
 /// Fluent notation reducing counters.
-pub fn word_count_fluent_4(filename: &Option<String>) -> Counts {
+pub fn word_count_fluent_4_map_reduce(filename: &Option<String>) -> Counts {
     let counts = get_reader(filename)
         .lines()
         .map(Result::unwrap)
-        .map(|l: String| l.split_whitespace().map(String::from).collect::<Counter<_>>())
+        .map(|l: String| {
+            l.split(char::is_whitespace)
+                .map(str::to_owned)
+                .collect::<Counter<_>>()
+        })
         .reduce(|a, b| a + b);
 
     // TODO convert Counter to Counts
@@ -373,7 +403,7 @@ pub fn word_count_fluent_4(filename: &Option<String>) -> Counts {
 
 // [Creating word iterator from line iterator](https://stackoverflow.com/a/53606081)
 /// Using a fluent notation of iterators and a global counts and for_each.
-/// comparable to word_count_fluent_3 with subtle differences.
+/// comparable to word_count_fluent_3_flat_map_for_each with subtle differences.
 pub fn word_count_fluent_5(filename: &Option<String>) -> Counts {
     let mut counts = Counts::new();
 

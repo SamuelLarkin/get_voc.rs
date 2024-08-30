@@ -21,12 +21,12 @@ use get_voc::{
     word_count_regex_for,
     word_count_fluent_1,
     word_count_fluent_2,
-    word_count_fluent_3,
-    word_count_fluent_4,
+    word_count_fluent_3_flat_map_for_each,
+    word_count_fluent_4_map_reduce,
     word_count_fluent_5,
     word_count_fluent_6,
 };
- 
+
 
 
 /// Helper function to display the counts.
@@ -175,8 +175,8 @@ fn main() {
         Commands::wcrf {filename} => word_count_regex_for(filename),
         Commands::wc_f1 {filename} => word_count_fluent_1(filename),
         Commands::wc_f2 {filename} => word_count_fluent_2(filename),
-        Commands::wc_f3 {filename} => word_count_fluent_3(filename),
-        Commands::wc_f4 {filename} => word_count_fluent_4(filename),
+        Commands::wc_f3 {filename} => word_count_fluent_3_flat_map_for_each(filename),
+        Commands::wc_f4 {filename} => word_count_fluent_4_map_reduce(filename),
         Commands::wc_f5 {filename} => word_count_fluent_5(filename),
         Commands::wc_f6 {filename} => word_count_fluent_6(filename),
     };
